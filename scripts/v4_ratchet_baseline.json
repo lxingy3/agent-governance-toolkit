@@ -58,7 +58,6 @@
       "PatternType": 3,
       "PolicyAction": 5,
       "PolicyInterceptor": 3,
-      "import:agt.policies.bridge": 2,
       "v4_rule_document_shape": 1
     },
     "agent-governance-python/agt-policies/tests/test_migrate_resolution.py": {

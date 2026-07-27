@@ -151,7 +151,7 @@ The toolkit governs agent runtime behavior (policy enforcement, trust scoring, e
 | Component | Location | Mechanism |
 |-----------|----------|-----------|
 | Compliance reports | `agent-governance-python/agent-mesh/src/agentmesh/governance/compliance.py:121-168` | `ComplianceReport` model with framework, period, controls, scores, violations |
-| Policy documents | `agent-governance-python/agt-policies/src/agt/policies/manifest.py:70-115` | Serializable YAML/JSON `AgtManifest` with version, name, rules, defaults |
+| Policy documents | `agent-governance-python/agt-policies/src/agt/policies/manifest.py:70-115` | Serializable YAML/JSON `the ACS manifest` with version, name, rules, defaults |
 | Compliance engine | `agent-governance-python/agent-os/modules/control-plane/src/agent_control_plane/compliance.py:306-341` | Framework-scoped reports with requirement counts and pass rates |
 | Annex IV exporter | `agent-governance-python/agent-mesh/src/agentmesh/governance/annex_iv.py:35-514` | `TechnicalDocumentationExporter` assembles five structured sections from compliance reports, policies, audit entries, and SLO/SLI data; emits Markdown or JSON and marks deployer-required content |
 | Evidence pipeline | `agent-governance-python/agent-mesh/src/agentmesh/governance/evidence_pipeline.py:56-358` | Collects policy YAML, audit JSONL, compliance report JSON, and SLO/SLI JSON; emits an Annex IV Markdown draft, evidence-source manifest, and gap warnings |
@@ -221,7 +221,7 @@ The toolkit governs agent runtime behavior (policy enforcement, trust scoring, e
 - [ ] **No AI disclosure injection**: No feature inserts an AI disclosure notice to end users at interaction time.
 - [ ] **Limited decision explainability**: Explanations are limited to policy rule `message` fields and audit `reason` strings -- no structured explanation framework for complex multi-factor decisions.
 
-**Extension point**: A `TransparencyInterceptor` in the `CompositeInterceptor` chain could inject AI disclosure metadata into tool call results. Policy rules with a `transparency_level` attribute could trigger different disclosure requirements by risk classification. Structured "instructions for use" could be exported from `AgtManifest` + `ComplianceReport` data.
+**Extension point**: A `TransparencyInterceptor` in the `CompositeInterceptor` chain could inject AI disclosure metadata into tool call results. Policy rules with a `transparency_level` attribute could trigger different disclosure requirements by risk classification. Structured "instructions for use" could be exported from `the ACS manifest` + `ComplianceReport` data.
 
 **Recommendation**: Add a `TransparencyInterceptor` and a `transparency_required` policy condition. Build an "instructions for use" template exporter alongside the Art. 11 documentation exporter.
 

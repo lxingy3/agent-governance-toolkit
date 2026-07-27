@@ -101,9 +101,9 @@ def get_governance_runtime(manifest: Any, **kwargs: Any):
     if provider is not None:
         return provider(manifest=manifest, **kwargs)
 
-    from agt.policies import AgtRuntime
+    from agent_control_specification import AgentControl
 
-    return AgtRuntime.from_manifest(manifest, **kwargs)
+    return AgentControl.from_path(str(manifest), **kwargs)
 
 
 def get_context_service(**kwargs: Any):

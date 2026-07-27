@@ -109,9 +109,9 @@ validation, versioning, conflict resolution, and multiple backend support.
 
 | Component | File | Key Class/Function |
 |-----------|------|--------------------|
-| Core policy runtime | `agent-governance-python/agt-policies/src/agt/policies/runtime.py` | `AgtRuntime` |
-| Adapter session runtime | `agent-governance-python/agt-policies/src/agt/policies/session.py` | `AdapterRuntimeSession` |
-| Manifest composition | `agent-governance-python/agt-policies/src/agt/policies/manifest.py` | `AgtManifest` |
+| Core policy runtime | `agent-governance-python/agt-policies/src/agt/policies/runtime.py` | `AgentControl` |
+| Adapter session runtime | `agent-governance-python/agt-policies/src/agt/policies/session.py` | `HostSession` |
+| Manifest composition | `agent-governance-python/agt-policies/src/agt/policies/manifest.py` | `the ACS manifest` |
 | AgentMesh policy engine | `agent-governance-python/agent-mesh/src/agentmesh/governance/policy.py:317` | `PolicyEngine` |
 | AgentMesh policy evaluator | `agent-governance-python/agent-mesh/src/agentmesh/governance/policy_evaluator.py:33` | `PolicyEvaluator` |
 | .NET policy engine | `agent-governance-dotnet/src/AgentGovernance/Policy/PolicyEngine.cs:16` | `PolicyEngine` |

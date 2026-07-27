@@ -11,7 +11,7 @@ from agents import Agent, InputGuardrail, OutputGuardrail
 from agents.guardrail import GuardrailFunctionOutput
 from agents.items import TResponseInputItem
 from agents.run_context import RunContextWrapper
-from agt.policies.session import AdapterRuntimeSession
+from agent_control_specification import HostSession
 
 from .audit import AuditLog
 from .identity import AgentIdentity
@@ -31,12 +31,12 @@ class TrustGuardrailConfig:
 class RuntimeGuardrailConfig:
     runtime: Any
     audit_log: Optional[AuditLog] = None
-    sessions: dict[str, AdapterRuntimeSession] = field(default_factory=dict)
+    sessions: dict[str, HostSession] = field(default_factory=dict)
 
-    def session(self, agent_id: str) -> AdapterRuntimeSession:
+    def session(self, agent_id: str) -> HostSession:
         session = self.sessions.get(agent_id)
         if session is None:
-            session = AdapterRuntimeSession(
+            session = HostSession(
                 self.runtime,
                 agent_id=agent_id,
                 session_id=f"openai-guardrail-{agent_id}",
@@ -79,7 +79,7 @@ def governance_input_guardrail(config: RuntimeGuardrailConfig) -> InputGuardrail
         body = input if isinstance(input, str) else [
             item if isinstance(item, dict) else str(item) for item in input
         ]
-        evaluation = config.session(agent.name).evaluate_input(body=body)
+        evaluation = config.session(agent.name).input(body)
         if config.audit_log is not None:
             config.audit_log.record(
                 agent_id=agent.name,
@@ -89,7 +89,7 @@ def governance_input_guardrail(config: RuntimeGuardrailConfig) -> InputGuardrail
             )
         return GuardrailFunctionOutput(
             output_info=evaluation.audit_record(),
-            tripwire_triggered=not evaluation.is_allowed(),
+            tripwire_triggered=not evaluation.verdict.decision.permits,
         )
 
     return InputGuardrail(guardrail_function=_check, name="agentmesh_governance_guardrail")
@@ -99,7 +99,7 @@ def governance_output_guardrail(config: RuntimeGuardrailConfig) -> OutputGuardra
     def _check(
         ctx: RunContextWrapper[Any], agent: Agent[Any], output: Any
     ) -> GuardrailFunctionOutput:
-        evaluation = config.session(agent.name).evaluate_output(content=str(output or ""))
+        evaluation = config.session(agent.name).output(str(output or ""))
         if config.audit_log is not None:
             config.audit_log.record(
                 agent_id=agent.name,
@@ -109,7 +109,7 @@ def governance_output_guardrail(config: RuntimeGuardrailConfig) -> OutputGuardra
             )
         return GuardrailFunctionOutput(
             output_info=evaluation.audit_record(),
-            tripwire_triggered=not evaluation.is_allowed(),
+            tripwire_triggered=not evaluation.verdict.decision.permits,
         )
 
     return OutputGuardrail(guardrail_function=_check, name="agentmesh_output_guardrail")

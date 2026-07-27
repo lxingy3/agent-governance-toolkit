@@ -479,9 +479,9 @@ class ACASandboxProvider(SandboxProvider):
             )
 
         if runtime is not None:
-            from agt.policies.session import AdapterRuntimeSession
+            from agent_control_specification import HostSession
 
-            evaluator = AdapterRuntimeSession(
+            evaluator = HostSession(
                 runtime, agent_id=agent_id, session_id=f"aca-{agent_id}"
             )
 
@@ -623,11 +623,11 @@ class ACASandboxProvider(SandboxProvider):
             }
             if context:
                 eval_ctx.update(context)
-            decision = evaluator.evaluate_pre_tool_call(
+            decision = evaluator.pre_tool_call(
                 tool_name="sandbox_execute", args=eval_ctx, call_id=uuid.uuid4().hex[:8]
             )
-            if not decision.is_allowed():
-                raise PermissionError(f"Governance denied: {decision.message or decision.reason_code}")
+            if not decision.verdict.decision.permits:
+                raise PermissionError(f"Governance denied: {decision.verdict.message or decision.verdict.reason}")
 
         enforce_no_subprocess_execution(code)
 

@@ -8,10 +8,10 @@
 
 | Scenario | Layer | What Happens |
 |----------|-------|--------------|
-| **1. Policy Enforcement** | `AgtRuntimeMiddleware` | YAML policy allows a search prompt but blocks `**/internal/**` — **before the LLM is called** |
+| **1. Policy Enforcement** | `AgentControlMiddleware` | YAML policy allows a search prompt but blocks `**/internal/**` — **before the LLM is called** |
 | **2. Capability Sandboxing** | `CapabilityGuardMiddleware` | LLM requests tool calls; governance allows `run_code` but denies `write_file` |
 | **3. Rogue Detection** | `RogueDetectionMiddleware` | Behavioral anomaly engine detects a 50-call burst and auto-quarantines |
-| **4. Content Filtering** | `AgtRuntimeMiddleware` | Multiple prompts evaluated — dangerous ones blocked, safe ones forwarded |
+| **4. Content Filtering** | `AgentControlMiddleware` | Multiple prompts evaluated — dangerous ones blocked, safe ones forwarded |
 | **Audit Trail** | `AuditLog` + Merkle chain | Every decision is cryptographically chained and verifiable |
 
 ## Architecture
@@ -20,7 +20,7 @@
 +-------------------------------------------------------+
 |  Agent (with real OpenAI / Azure OpenAI backend)      |
 |  +--------------------------------------------------+ |
-|  |  AgtRuntimeMiddleware (YAML policy eval)    | <-- Blocks before LLM
+|  |  AgentControlMiddleware (YAML policy eval)    | <-- Blocks before LLM
 |  |  CapabilityGuardMiddleware  (tool allow/deny)     | <-- Intercepts tools
 |  |  RogueDetectionMiddleware   (anomaly scoring)     | <-- Behavioral SRE
 |  +--------------------------------------------------+ |

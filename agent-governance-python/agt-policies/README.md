@@ -25,9 +25,9 @@ annotators contribute additional context.
 `agt-policies` is the Python package that exposes ACS to AGT hosts and
 adapters. Use it when host code needs to:
 
-- author and validate a lossless typed `AgtManifest`
+- author and validate a lossless typed `the ACS manifest`
 - build complete AGT snapshots for ACS intervention points
-- call the ACS Python SDK through `AgtRuntime`
+- call the ACS Python SDK through `AgentControl`
 - enforce `allow`, `warn`, `deny`, `escalate`, and `transform` verdicts
 - preserve v4 Agent OS adapter behavior while routing through ACS
 
@@ -45,17 +45,17 @@ AGT adapters enforce.
 
 ## What is here
 
-- `agt.policies.snapshot` — snapshot builder per
+- `agent_control_specification.snapshot` — snapshot builder per
   `spec/agt/AGT-SNAPSHOT-1.0.md`.
-- `agt.policies.manifest` provides lossless typed `AgtManifest`, provenance-aware
+- `agent_control_specification.manifest` provides lossless typed `the ACS manifest`, provenance-aware
   local reference resolution, and adapter compatibility preflight.
-- `agt.policies.runtime` — renders a v4 `AgtRuntime` into an ACS
+- `agent_control_specification` — renders a v4 `AgentControl` into an ACS
   manifest + OPA rego module.
-- `agt.policies.result` provides native immutable `PolicyEvaluation` plus the
+- `agent_control_specification.result` provides native immutable `PolicyEvaluation` plus the
   temporary `EvaluationResult` compatibility surface.
-- `agt.policies.session` provides `AdapterRuntimeSession`, which owns one
+- `agent_control_specification` provides `HostSession`, which owns one
   session's snapshots and budget counters while sharing a stateless runtime.
-- `agt.policies.runtime` — Python wrapper over the ACS Python SDK that
+- `agent_control_specification` — Python wrapper over the ACS Python SDK that
   loads a resolved manifest, runs intervention points, applies the
   transform verdict, enforces approval, and emits AGT telemetry events.
 
@@ -65,7 +65,7 @@ AGT adapters enforce.
    `pre_tool_call`.
 2. `SnapshotBuilder` creates the complete AGT snapshot for that call,
    including the agent/session envelope and current budget counters.
-3. `AgtRuntime.from_manifest(...)` validates the typed manifest, resolves
+3. `AgentControl.from_path(str(...))` validates the typed manifest, resolves
    relative references from explicit provenance, and calls the ACS Python SDK.
 4. The returned ACS verdict is mapped to immutable `PolicyEvaluation`,
    including `verdict`, namespaced `reason_code`, optional `transform`,
@@ -80,11 +80,11 @@ AGT adapters enforce.
 ```python
 from pathlib import Path
 
-from agt.policies import AgtManifest, SnapshotBuilder
-from agt.policies.runtime import AgtRuntime
+from agent_control_specification import validate_manifest, SnapshotBuilder
+from agent_control_specification import AgentControl
 
-manifest = AgtManifest.from_path(Path("manifest.yaml"))
-runtime = AgtRuntime.from_manifest(manifest)
+manifest = the ACS manifest.from_path(Path("manifest.yaml"))
+runtime = AgentControl.from_path(str(manifest))
 snapshot = SnapshotBuilder(agent_id="mail-agent", session_id="run-1").input(
     body={"body": "hello"}
 )
@@ -94,7 +94,7 @@ result = runtime.evaluate("input", snapshot)
 Mapping, typed, and YAML-text inputs must provide `base_dir` when they contain
 relative references. The runtime does not use the process working directory as
 an implicit trust boundary. The typed model preserves `limits`, but
-`AgtRuntime.from_manifest(...)` rejects it until the Python SDK can enforce
+`AgentControl.from_path(str(...))` rejects it until the Python SDK can enforce
 those values rather than silently dropping them.
 `PolicyEvaluation.audit_record()` emits schema `agt.policy_evaluation.v1`.
 Policy-authored messages remain restricted audit detail, while host exceptions
@@ -105,7 +105,7 @@ The dependency-light
 example constructs an A2A adapter with the public `runtime=` argument and a
 custom ACS policy dispatcher.
 
-`AdapterRuntimeSession` charges every attempted tool call, including denied
+`HostSession` charges every attempted tool call, including denied
 and failed attempts, before the next policy evaluation. Model token usage is
 recorded after `post_model_call`. Existing v4 adapters temporarily disable
 those native charges because they still update their old execution context.
@@ -113,8 +113,8 @@ Phase 3 removes that compatibility override.
 
 ## Compatibility bridge
 
-Existing Agent OS adapters still accept the v4 `AgtRuntime`
-dataclass. `agt.policies.runtime` renders that policy into an ACS
+Existing Agent OS adapters still accept the v4 `AgentControl`
+dataclass. `agent_control_specification` renders that policy into an ACS
 manifest plus a generated Rego bundle. The bridge preserves v4
 semantics where they differ from the native ACS defaults, including an
 empty `allowed_tools` list meaning no allowlist and `max_tool_calls=0`
@@ -153,7 +153,7 @@ pip install -e ".[dev]"
 pytest
 ```
 
-Tests that exercise `agt.policies.runtime` require the native ACS Python
+Tests that exercise `agent_control_specification` require the native ACS Python
 SDK from `policy-engine/sdk/python`. In a repository checkout, build it
 first:
 

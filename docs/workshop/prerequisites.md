@@ -60,7 +60,7 @@ pip install agent-governance-toolkit[full]
 Verify the install:
 
 ```bash
-python -c "from agt.policies import AgtManifest; print('✅ native policy API OK')"
+python -c "from agent_control_specification import validate_manifest; print('✅ native policy API OK')"
 python -c "from agentmesh import AgentIdentity; print('✅ agentmesh-platform OK')"
 python -c "import agent_governance; print('✅ agent-governance-toolkit OK')"
 ```
@@ -101,8 +101,8 @@ Run this script to confirm everything is working:
 
 ```bash
 python -c "
-from agt.policies import AgtManifest
-m = AgtManifest.model_validate({
+from agent_control_specification import validate_manifest
+m = the ACS manifest.model_validate({
     'agent_control_specification_version': '0.3.1-beta',
     'metadata': {'name': 'workshop-check'},
 })

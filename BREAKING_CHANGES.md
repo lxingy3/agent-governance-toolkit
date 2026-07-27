@@ -49,7 +49,7 @@ surface and prevents the generator package from becoming a second SDK.
 
 The Python runtime no longer exports or interprets the pre-ACS rule model,
 compatibility result types, runtime bridge, folder resolver, local backends, or
-framework-local intent policies. Framework adapters require `AgtRuntime`.
+framework-local intent policies. Framework adapters require `AgentControl`.
 Sandbox providers now separate `runtime=` from explicit `SandboxConfig`.
 The unreleased `cedarling-agentmesh` backend and its consolidated package extra
 were also removed because they depended on the deleted backend contract.
@@ -73,7 +73,7 @@ The following public symbols are removed:
   `document_to_governance`, `policy_document_to_shared`,
   `shared_to_policy_document`, `to_policy_action`
 - `agent_os.integrations`: `GovernancePolicy`, `AsyncGovernedWrapper`
-- `agt.policies`: `EvaluationResult`
+- `agent_control_specification`: `EvaluationResult`
 - `agt.manifest_resolution` (the whole module, along with `agt._harness.opa_runner`):
   `resolve_manifest`, `discover_policies`, `merge_documents`, `filter_by_scope`,
   `ResolutionError`, `ResolutionReason`
@@ -95,7 +95,7 @@ effective behaviour.
 **Migration**
 
 Run the one-way migration command for supported literal inputs, then construct
-`AgtRuntime` from the generated manifest. Move sandbox resources, mounts,
+`AgentControl` from the generated manifest. Move sandbox resources, mounts,
 network settings, and tool exposure into `SandboxConfig`. Replace compatibility
 exception fields with `evaluation_result` and the native audit record.
 

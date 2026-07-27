@@ -39,6 +39,7 @@ from ._client import (
     validate_manifest_overlay,
 )
 from ._orchestration import AgentControl
+from ._host import HostSession, SnapshotBuilder, run_sync
 from ._telemetry import (
     DEFAULT_OTEL_METER_NAME,
     InMemoryTelemetrySink,
@@ -79,6 +80,9 @@ from .validation import (
 )
 
 __all__ = [
+    "HostSession",
+    "SnapshotBuilder",
+    "run_sync",
     "AdapterUnsupportedError",
     "AgentControlLiteLLMGuardrail",
     "AgentControl",

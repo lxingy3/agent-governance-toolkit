@@ -527,11 +527,11 @@ class HyperLightSandboxProvider(SandboxProvider):
             }
             if context:
                 eval_ctx.update(context)
-            decision = evaluator.evaluate_pre_tool_call(
+            decision = evaluator.pre_tool_call(
                 tool_name="sandbox_execute", args=eval_ctx, call_id=uuid.uuid4().hex[:8]
             )
-            if not decision.is_allowed():
-                reason = decision.message or decision.reason_code
+            if not decision.verdict.decision.permits:
+                reason = decision.verdict.message or decision.verdict.reason
                 raise PermissionError(f"Governance denied: {reason}")
 
         enforce_no_subprocess_execution(code)
@@ -845,9 +845,9 @@ class HyperLightSandboxProvider(SandboxProvider):
         self, runtime: Any, agent_id: str, session_id: str
     ) -> Any:
         """Create the native ACS session used for host-side execution gates."""
-        from agt.policies.session import AdapterRuntimeSession
+        from agent_control_specification import HostSession
 
-        return AdapterRuntimeSession(
+        return HostSession(
             runtime, agent_id=agent_id, session_id=session_id
         )
 
