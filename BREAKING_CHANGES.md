@@ -35,6 +35,94 @@ surface and prevents the generator package from becoming a second SDK.
 - Invoke generation through `acs` or `acs-generate`. Code that imported
   generator implementation classes must move to the CLI or maintain its own
   integration with the internal modules.
+## Python runtime policy APIs now require native ACS
+
+**Date:** TBD
+
+**Affected**
+
+- `agt-policies` and `agent-os` framework adapters
+- `agt-sandbox`
+- Policy generation, lint, replay, and example tooling
+
+**What changed**
+
+The Python runtime no longer exports or interprets the pre-ACS rule model,
+compatibility result types, runtime bridge, folder resolver, local backends, or
+framework-local intent policies. Framework adapters require `AgtRuntime`.
+Sandbox providers now separate `runtime=` from explicit `SandboxConfig`.
+The unreleased `cedarling-agentmesh` backend and its consolidated package extra
+were also removed because they depended on the deleted backend contract.
+
+The following public symbols are removed:
+
+- `agent_os.policies` rule model: `PolicyDocument`, `PolicyRule`,
+  `PolicyCondition`, `PolicyDefaults`, `PolicyOperator`, `PolicyAction`,
+  `PolicyScope`, `Condition`, `DynamicCondition`, `DynamicConditionType`,
+  `ViolationCategory`
+- `agent_os.policies` evaluators and backends: `PolicyEvaluator`,
+  `AsyncPolicyEvaluator`, `ExternalPolicyBackend`, `OPABackend`,
+  `CedarBackend`, `ConcurrencyStats`
+- `agent_os.policies` decision and conflict types: `PolicyDecision`,
+  `BackendDecision`, `CandidateDecision`, `PolicyCheckResult`,
+  `PolicyConflictResolver`, `ConflictResolutionStrategy`, `ResolutionResult`
+- `agent_os.policies` shared-schema mirror: `SharedPolicySchema`,
+  `SharedPolicyRule`, `SharedPolicyEvaluator`, `SharedPolicyDecision`,
+  `SandboxMounts`
+- `agent_os.policies` conversion helpers: `governance_to_document`,
+  `document_to_governance`, `policy_document_to_shared`,
+  `shared_to_policy_document`, `to_policy_action`
+- `agent_os.integrations`: `GovernancePolicy`, `AsyncGovernedWrapper`
+- `agt.policies`: `EvaluationResult`
+- `agt.manifest_resolution` (the whole module, along with `agt._harness.opa_runner`):
+  `resolve_manifest`, `discover_policies`, `merge_documents`, `filter_by_scope`,
+  `ResolutionError`, `ResolutionReason`
+- `agent_sandbox` policy-to-config helpers: `aca_config_from_policy`,
+  `docker_config_from_policy`, `hyperlight_config_from_policy`,
+  `mxc_config_from_policy`, `nono_config_from_policy`, `policy_to_mxc_json`,
+  `policy_yaml_to_mxc_json`, `policy_yaml_to_nono_config`
+
+**Tool-call budgets count one call differently**
+
+The old bridge presented the tool-call count *including* the call being
+evaluated, so `max_tool_calls: 3` denied the third call and allowed two. The
+native path presents the count of calls already completed, so `max_tool_calls: 3`
+now allows three. The bridge carried this as a deliberate compatibility
+override that it recorded as temporary. A deployed policy therefore permits one
+more tool call than before; lower the limit by one to keep the previous
+effective behaviour.
+
+**Migration**
+
+Run the one-way migration command for supported literal inputs, then construct
+`AgtRuntime` from the generated manifest. Move sandbox resources, mounts,
+network settings, and tool exposure into `SandboxConfig`. Replace compatibility
+exception fields with `evaluation_result` and the native audit record.
+
+---
+
+## Rust and Mastra framework policy surfaces now use ACS manifests
+
+**Date:** TBD
+
+**Affected:**
+
+- Rust `agentmesh::FrameworkGovernanceAdapter`
+- `@microsoft/agentmesh-mastra`
+
+**What changed:**
+
+The Rust framework adapter no longer accepts its local policy struct and
+pattern enum. It accepts native `AgentControl` or `Manifest` input. The Mastra
+wrapper no longer exports a local policy middleware. It requires a Node ACS
+`AgentControl` and delegates tool execution to `runTool`.
+
+**Migration:**
+
+Move tool catalogs, bindings, budgets, content policies, and approval rules
+into an ACS manifest. Rust callers construct `AgentControl::from_manifest` or
+`FrameworkGovernanceAdapter::from_path`. Mastra callers pass
+`AgentControl.fromPath(...)` as the `control` option to `createGovernedTool`.
 
 ---
 
@@ -180,9 +268,8 @@ policy input. This release standardizes all three on fail-closed semantics:
 
 1. **Default action is now deny.** When `defaults.action` is omitted, or when
    no policies are loaded at all, the decision is now `deny` in every SDK.
-   - Python: `PolicyDefaults.action` now defaults to `PolicyAction.DENY`, and
-     the evaluator returns `deny` when no policies are loaded (previously both
-     were `allow`, fail-open).
+   - Python native ACS evaluation fails closed when no valid binding can
+     produce a decision.
    - .NET: the zero-policy path now returns `PolicyDecision.DenyDefault`
      (previously `AllowDefault`).
    - TypeScript already defaulted to `deny`; no change.
