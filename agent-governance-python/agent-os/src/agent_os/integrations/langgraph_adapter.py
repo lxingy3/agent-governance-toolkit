@@ -345,10 +345,11 @@ class LangGraphKernel(BaseIntegration):
 
         # 3. Cedar/OPA evaluator revision (if configured)
         evaluator_rev = ""
-        if self._evaluator is not None:
+        evaluator = getattr(self, "_evaluator", None)
+        if evaluator is not None:
             evaluator_rev = (
-                getattr(self._evaluator, "bundle_revision", "")
-                or getattr(self._evaluator, "backend_version", "")
+                getattr(evaluator, "bundle_revision", "")
+                or getattr(evaluator, "backend_version", "")
                 or "unknown"
             )
 

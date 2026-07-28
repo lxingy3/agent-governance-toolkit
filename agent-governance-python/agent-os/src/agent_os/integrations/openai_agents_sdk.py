@@ -214,7 +214,7 @@ class OpenAIAgentsKernel(BaseIntegration):
             ``uptime_seconds``.
         """
         uptime: float = time.monotonic() - self._start_time
-        has_activity = bool(self._agent_contexts) or bool(self._wrapped_agents)
+        has_activity = bool(self._agent_contexts)
         status: str = "degraded" if self._last_error else "healthy"
         return {
             "status": status,

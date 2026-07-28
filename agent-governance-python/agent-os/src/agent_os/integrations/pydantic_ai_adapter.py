@@ -151,7 +151,7 @@ class PydanticAIKernel(BaseIntegration):
             "status": status,
             "backend": "pydantic_ai",
             "backend_available": HAS_PYDANTIC_AI,
-            "backend_connected": bool(self._wrapped_agents),
+            "backend_connected": bool(self.contexts),
             "last_error": self._last_error,
             "uptime_seconds": round(uptime, 2),
         }
