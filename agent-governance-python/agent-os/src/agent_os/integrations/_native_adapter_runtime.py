@@ -90,7 +90,7 @@ class AdapterRuntime(Protocol):
 
 @dataclass(frozen=True)
 class NativeAdapterResult:
-    """Adapter decision backed by the native ``PolicyEvaluation`` contract."""
+    """Adapter decision backed by an ACS ``InterventionPointResult``."""
 
     evaluation: Any
 
